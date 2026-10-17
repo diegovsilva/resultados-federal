@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { formatIsoDateToPtBr, formatTimestampToPtBr } from "@/lib/date";
-import { splitQueries } from "@/lib/search";
+import { rankByPrize, splitQueries } from "@/lib/search";
 import type { Concurso, Pendencia } from "@/lib/types";
 import styles from "@/app/page.module.css";
 
@@ -62,11 +62,32 @@ export function HomePage(props: HomePageProps) {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<BuscaItem[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem("theme-mode", theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (!summaryOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setSummaryOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [summaryOpen]);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
@@ -192,6 +213,16 @@ export function HomePage(props: HomePageProps) {
   const csvUrl = `/api/resultados.csv${downloadQueryString ? `?${downloadQueryString}` : ""}`;
   const jsonUrl = `/api/resultados${downloadQueryString ? `?${downloadQueryString}&` : "?"}download=1`;
 
+  const searchSummary = useMemo(() => {
+    const consultas = [...new Set(searchResults.map((item) => item.consulta))];
+
+    return consultas.map((consulta) => ({
+      consulta,
+      total: searchResults.filter((item) => item.consulta === consulta).length,
+      ranking: rankByPrize(searchResults, consulta),
+    }));
+  }, [searchResults]);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -306,7 +337,17 @@ export function HomePage(props: HomePageProps) {
             {searchResults.length === 0 ? (
               <p>Nenhuma busca executada ainda ou nenhum resultado encontrado.</p>
             ) : (
-              <table className={styles.table}>
+              <>
+                <div className={styles.inlineActions}>
+                  <button
+                    className={styles.secondaryButton}
+                    onClick={() => setSummaryOpen(true)}
+                    type="button"
+                  >
+                    Resumo por prêmio
+                  </button>
+                </div>
+                <table className={styles.table}>
                 <thead>
                   <tr>
                     <th>Consulta</th>
@@ -327,7 +368,8 @@ export function HomePage(props: HomePageProps) {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+                </table>
+              </>
             )}
           </div>
         </section>
@@ -417,6 +459,64 @@ export function HomePage(props: HomePageProps) {
           </section>
         ) : null}
       </main>
+
+      {summaryOpen ? (
+        <div className={styles.modalOverlay} onClick={() => setSummaryOpen(false)}>
+          <div
+            aria-label="Resumo da busca por posição de prêmio"
+            aria-modal="true"
+            className={styles.modal}
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <div className={styles.modalHeader}>
+              <div>
+                <h2>Resumo por posição de prêmio</h2>
+                <p>
+                  Quantas vezes cada final apareceu em cada posição, ranqueado da
+                  mais frequente para a menos frequente.
+                </p>
+              </div>
+              <button
+                aria-label="Fechar resumo"
+                className={styles.modalClose}
+                onClick={() => setSummaryOpen(false)}
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+
+            {searchSummary.map((group) => (
+              <section className={styles.modalGroup} key={group.consulta}>
+                <h3>
+                  Final {group.consulta} — {group.total} ocorrências
+                </h3>
+                <table className={`${styles.table} ${styles.modalTable}`}>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Posição</th>
+                      <th>Ocorrências</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.ranking.map((row, index) => (
+                      <tr key={row.premio}>
+                        <td>{index + 1}º</td>
+                        <td>{row.premio}º prêmio</td>
+                        <td>
+                          {row.total}× no {row.premio}º sorteio
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </section>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

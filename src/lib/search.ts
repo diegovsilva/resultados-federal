@@ -57,3 +57,27 @@ export function findTicketMatches(
 
   return matches.sort((a, b) => b.concurso - a.concurso);
 }
+
+export type PrizeRankingItem = {
+  premio: 1 | 2 | 3 | 4 | 5;
+  total: number;
+};
+
+export function rankByPrize(
+  matches: BilheteMatch[],
+  consulta: string,
+): PrizeRankingItem[] {
+  const counts = new Map<number, number>();
+
+  for (const match of matches) {
+    if (match.consulta !== consulta) {
+      continue;
+    }
+
+    counts.set(match.premio, (counts.get(match.premio) ?? 0) + 1);
+  }
+
+  return ([1, 2, 3, 4, 5] as const)
+    .map((premio) => ({ premio, total: counts.get(premio) ?? 0 }))
+    .sort((a, b) => b.total - a.total || a.premio - b.premio);
+}
