@@ -17,6 +17,17 @@ const concursos: Concurso[] = [
 ];
 
 describe("findTicketMatches", () => {
+  it("localiza correspondência por final de 3 dígitos", () => {
+    const result = findTicketMatches(concursos, "871");
+    expect(result).toHaveLength(2);
+    expect(result[0]?.premio).toBe(1);
+    expect(result[1]?.premio).toBe(3);
+  });
+
+  it("rejeita busca com menos de 3 dígitos", () => {
+    expect(findTicketMatches(concursos, "71")).toHaveLength(0);
+  });
+
   it("localiza correspondência por final de 4 dígitos", () => {
     const result = findTicketMatches(concursos, "0871");
     expect(result).toHaveLength(2);

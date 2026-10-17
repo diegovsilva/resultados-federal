@@ -151,7 +151,7 @@ export function HomePage(props: HomePageProps) {
     const terms = splitQueries(searchValue);
 
     if (terms.length === 0) {
-      setSearchError("Informe ao menos um número com 4, 5 ou 6 dígitos.");
+      setSearchError("Informe ao menos um número com 3, 4, 5 ou 6 dígitos.");
       setSearchResults([]);
       return;
     }
@@ -285,14 +285,14 @@ export function HomePage(props: HomePageProps) {
           <div className={styles.panelHeader}>
             <div>
               <h2>Buscar final do bilhete</h2>
-              <p>Digite vários números separados por vírgula. Aceita 4, 5 ou 6 dígitos.</p>
+              <p>Digite vários números separados por vírgula. Aceita 3, 4, 5 ou 6 dígitos.</p>
             </div>
           </div>
 
           <form className={styles.searchForm} onSubmit={handleSearch}>
             <input
               onChange={(event) => setSearchValue(event.target.value)}
-              placeholder="Ex.: 0871, 54321, 000123"
+              placeholder="Ex.: 871, 0871, 54321, 000123"
               value={searchValue}
             />
             <button className={styles.primaryButton} disabled={searchLoading} type="submit">

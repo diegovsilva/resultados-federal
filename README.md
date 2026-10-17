@@ -13,7 +13,7 @@ App em Next.js 16 + TypeScript que coleta todos os resultados da Loteria Federal
   - `/api/resultados`
   - `/api/resultados.csv`
   - `/api/buscar?n=0871`
-- Busca por final do bilhete aceitando 4, 5 ou 6 dígitos
+- Busca por final do bilhete aceitando 3, 4, 5 ou 6 dígitos
 - Interface responsiva em português com modo claro/escuro
 - Testes unitários com Vitest
 - Workflow opcional de fallback no GitHub Actions para quando a Caixa bloquear Vercel

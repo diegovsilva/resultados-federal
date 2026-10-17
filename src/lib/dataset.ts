@@ -23,7 +23,13 @@ export async function readDataset(): Promise<Dataset> {
     return createEmptyDataset();
   }
 
-  const raw = await readBlobText(DATASET_PATH);
+  let raw: string | null = null;
+
+  try {
+    raw = await readBlobText(DATASET_PATH);
+  } catch {
+    return createEmptyDataset();
+  }
 
   if (!raw) {
     return createEmptyDataset();

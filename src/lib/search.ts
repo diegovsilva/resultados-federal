@@ -13,7 +13,7 @@ export type BilheteMatch = {
 export function normalizeTicketSuffix(value: string) {
   const digits = value.replace(/\D/g, "");
 
-  if (digits.length < 4 || digits.length > 6) {
+  if (digits.length < 3 || digits.length > 6) {
     return null;
   }
 

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
   if (queries.length === 0) {
     return NextResponse.json(
-      { error: "Informe um número com 4, 5 ou 6 dígitos." },
+      { error: "Informe um número com 3, 4, 5 ou 6 dígitos." },
       { status: 400 },
     );
   }
